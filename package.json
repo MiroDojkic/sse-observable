@@ -1,8 +1,15 @@
 {
-  "name": "sse-client",
+  "name": "sse-observable",
   "version": "0.0.1",
   "description": "Fetch-based SSE client",
-  "keywords": ["sse", "server-sent", "events", "pubsub", "fetch"],
+  "keywords": [
+    "sse",
+    "server-sent",
+    "eventsource",
+    "events",
+    "pubsub",
+    "fetch"
+  ],
   "license": "ISC",
   "author": "",
   "exports": "dist/sse-client.modern.js",
@@ -10,7 +17,9 @@
   "umd:main": "dist/sse-client.umd.js",
   "module": "dist/sse-client.module.js",
   "source": "src/index.js",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "microbundle",
     "lint": "eslint src",

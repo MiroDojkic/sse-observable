@@ -4,22 +4,24 @@ import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
 import split from 'split2';
 import to from 'to2';
 
-function createClient() {
+function createObservable(path) {
   const emitter = mitt();
   let lastEventId;
 
   function emitEvent(buf, enc, next) {
     const message = buf.toString();
     if (message.startsWith(':')) return next();
-    const fields = message.split(/[\r\n]/);
+    const lines = message.split(/[\r\n]/);
     let event = 'message';
     const data = [];
-    fields.forEach(parseField);
+    lines.forEach(parseLine);
     emitter.emit(event, { lastEventId, event, data });
     next();
 
-    function parseField(field) {
-      const [, name, value] = field.match(/^(data|id|event):?\s*(.*)s*/);
+    function parseLine(line) {
+      const field = line.match(/^(data|id|event):?\s*(.*)s*/);
+      if (!field) return;
+      const [, name, value] = field;
       if (name === 'data') data.push(value);
       if (!value) return;
       if (name === 'event') { event = value; }
@@ -27,16 +29,29 @@ function createClient() {
     }
   }
 
-  function subscribe(path, opts) {
-    return window.fetch(path, opts)
-      .then(response => pump(
-        new ReadableWebToNodeStream(response.body),
-        split('\n\n'),
-        to(emitEvent)
-      ));
+  function disposeListeners(error) {
+    emitter.emit('error', error);
+    emitter.all.clear();
   }
 
-  return { ...emitter, subscribe };
+  function connect(opts) {
+    return window.fetch(path, opts)
+      .then(response => {
+        if (!response.ok) {
+          emitter.emit('error');
+          throw new Error(`Failed to connect to SSE endpoint: ${path}`);
+        }
+        emitter.emit('open');
+        return pump(
+          new ReadableWebToNodeStream(response.body),
+          split('\n\n'),
+          to(emitEvent),
+          disposeListeners
+        );
+      });
+  }
+
+  return { ...emitter, connect };
 }
 
-export default createClient;
+export default createObservable;
