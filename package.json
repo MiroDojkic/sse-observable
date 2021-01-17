@@ -1,0 +1,39 @@
+{
+  "name": "sse-client",
+  "version": "0.0.1",
+  "description": "",
+  "source": "src/index.js",
+  "main": "dist/index.js",
+  "exports": "dist/sse-client.modern.js",
+  "module": "dist/sse-client.module.js",
+  "umd:main": "dist/sse-client.umd.js",
+  "scripts": {
+    "build": "microbundle",
+    "lint": "eslint src"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.12.1",
+    "@babel/eslint-plugin": "^7.12.1",
+    "@extensionengine/eslint-config": "^2.0.0",
+    "eslint": "^7.18.0",
+    "eslint-config-semistandard": "^15.0.1",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-require-sort": "^1.2.2",
+    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-vue": "^7.4.1",
+    "microbundle": "^0.13.0"
+  },
+  "dependencies": {
+    "mitt": "^2.1.0",
+    "pump": "^3.0.0",
+    "readable-web-to-node-stream": "^3.0.1",
+    "split2": "^3.2.2",
+    "to2": "^1.0.0"
+  }
+}
