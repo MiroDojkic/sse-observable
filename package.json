@@ -1,6 +1,6 @@
 {
   "name": "sse-observable",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Fetch-based SSE client",
   "keywords": [
     "sse",
