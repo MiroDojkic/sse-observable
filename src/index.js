@@ -4,9 +4,35 @@ import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
 import split from 'split2';
 import to from 'to2';
 
-function createObservable(path) {
+function createObservable(path, opts) {
   const emitter = mitt();
   let lastEventId;
+  const controller = new AbortController();
+  const { signal } = controller;
+  signal.addEventListener('abort', removeListeners);
+  connect(path, { ...opts, signal });
+  return { ...emitter, close };
+
+  function close() {
+    controller.abort();
+  }
+
+  function connect(path, opts) {
+    return window.fetch(path, opts)
+      .then(response => {
+        if (!response.ok) {
+          emitter.emit('error');
+          throw new Error(`Failed to connect to SSE endpoint: ${path}`);
+        }
+        emitter.emit('open');
+        return pump(
+          new ReadableWebToNodeStream(response.body),
+          split('\n\n'),
+          to(emitEvent),
+          removeListeners
+        );
+      })
+  }
 
   function emitEvent(buf, enc, next) {
     const message = buf.toString();
@@ -29,29 +55,10 @@ function createObservable(path) {
     }
   }
 
-  function disposeListeners(error) {
+  function removeListeners(error) {
     emitter.emit('error', error);
     emitter.all.clear();
   }
-
-  function connect(opts) {
-    return window.fetch(path, opts)
-      .then(response => {
-        if (!response.ok) {
-          emitter.emit('error');
-          throw new Error(`Failed to connect to SSE endpoint: ${path}`);
-        }
-        emitter.emit('open');
-        return pump(
-          new ReadableWebToNodeStream(response.body),
-          split('\n\n'),
-          to(emitEvent),
-          disposeListeners
-        );
-      });
-  }
-
-  return { ...emitter, connect };
 }
 
 export default createObservable;
