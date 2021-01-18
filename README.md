@@ -3,14 +3,14 @@ fetch-based SSE client/EventSource with event emitter interface (WIP :warning:)
 
 ### Example
 ```javascript
-const sse = require('sse-observable')('/sse/endpoint');
+const connectSSE = require('sse-observable');
 
-sse.on('open', () => console.log('SSE connection openned! :tada:'));
-sse.on('message', ({ data, lastEventId }) => doSomething(data));
-sse.on('custom-event', ({ data, lastEventId }) => doSomething(data));
-sse.on('error', err => console.log('SSE connection failed: ', err));
-
-sse.connect({
+const sse = connectSSE('/sse/endpoint/', {
   headers: { Authorization: 'Bearer ...' }
 });
+
+sse.on('open', () => console.log('SSE connection openned! :tada:'));
+sse.on('message', ({ data, lastEventId }) => data));
+sse.on('custom-event', ({ data, lastEventId }) => data));
+sse.on('error', err => console.log('SSE connection failed: ', err));
 ```
