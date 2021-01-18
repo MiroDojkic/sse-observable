@@ -23,7 +23,7 @@
   "scripts": {
     "build": "microbundle",
     "lint": "eslint src",
-    "publish": "np"
+    "publish": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "dependencies": {
     "mitt": "^2.1.0",
@@ -45,10 +45,6 @@
     "eslint-plugin-require-sort": "^1.2.2",
     "eslint-plugin-standard": "^5.0.0",
     "eslint-plugin-vue": "^7.4.1",
-    "microbundle": "^0.13.0",
-    "np": "^7.2.0"
-  },
-  "np": {
-    "yarn": false
+    "microbundle": "^0.13.0"
   }
 }
