@@ -30,7 +30,7 @@
     "pump": "^3.0.0",
     "readable-web-to-node-stream": "^3.0.1",
     "split2": "^3.2.2",
-    "to2": "^1.0.0"
+    "through2": "^4.0.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.1",

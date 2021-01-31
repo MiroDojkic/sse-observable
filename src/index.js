@@ -2,7 +2,8 @@ import mitt from 'mitt';
 import pump from 'pump';
 import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
 import split from 'split2';
-import to from 'to2';
+import parseSSE from './sse-parser';
+import through from 'through2';
 
 const states = {
   CONNECTING: 'CONNECTING',
@@ -40,32 +41,21 @@ function createObservable(path, opts) {
         return pump(
           new ReadableWebToNodeStream(response.body),
           split('\n\n'),
-          to(emitEvent),
+          parseSSE(),
+          emitEvent(),
           retryConnect
         );
       });
   }
 
-  function emitEvent(buf, enc, next) {
-    const message = buf.toString();
-    if (message.startsWith(':')) return next();
-    const lines = message.split(/[\r\n]/);
-    let event = 'message';
-    const data = [];
-    lines.forEach(parseLine);
-    emitter.emit(event, { lastEventId, event, data });
-    next();
-
-    function parseLine(line) {
-      const field = line.match(/^(data|id|event):?\s*(.*)s*/);
-      if (!field) return;
-      const [, name, value] = field;
-      if (name === 'data') data.push(value);
-      if (!value) return;
-      if (name === 'retry') reconnectDelay = value;
-      if (name === 'event') { event = value; }
-      if (name === 'id') { lastEventId = value; }
-    }
+  function emitEvent() {
+    return through.obj((chunk, _, next) => {
+      const { event, data } = chunk;
+      if (chunk.id) lastEventId = chunk.id;
+      if (chunk.reconnectDelay) reconnectDelay = chunk.reconnectDelay;
+      emitter.emit(event, data);
+      next();
+    });
   }
 
   function retryConnect(error) {
@@ -81,3 +71,4 @@ function createObservable(path, opts) {
 }
 
 export default createObservable;
+
