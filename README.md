@@ -10,7 +10,7 @@ const sse = connectSSE('/sse/endpoint/', {
 });
 
 sse.on('open', () => console.log('SSE connection openned! :tada:'));
-sse.on('message', ({ data, lastEventId }) => data));
-sse.on('custom-event', ({ data, lastEventId }) => data));
+sse.on('message', data => {}));
+sse.on('custom-event', data => {}));
 sse.on('error', err => console.log('SSE connection failed: ', err));
 ```
