@@ -16,7 +16,7 @@
   "main": "dist/index.js",
   "umd:main": "dist/sse-client.umd.js",
   "module": "dist/sse-client.module.js",
-  "source": "src/index.js",
+  "source": "src/index.ts",
   "files": [
     "dist"
   ],

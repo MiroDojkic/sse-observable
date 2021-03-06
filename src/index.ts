@@ -2,7 +2,7 @@ import mitt from 'mitt';
 import pump from 'pump';
 import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
 import split from 'split2';
-import parseSSE from './sse-parser';
+import parseSSE, { SSE } from './sse-parser';
 import through from 'through2';
 
 const states = {
@@ -12,11 +12,11 @@ const states = {
 };
 const DEFAULT_RECONNECTION_DELAY = 30000;
 
-function createObservable(path, opts) {
+function createObservable(path: string, opts: RequestInit) {
   const emitter = mitt();
   let readyState = states.CONNECTING;
   let reconnectDelay = DEFAULT_RECONNECTION_DELAY;
-  let lastEventId;
+  let lastEventId: string;
   const controller = new AbortController();
   const { signal } = controller;
   const headers = new Headers(opts.headers);
@@ -25,10 +25,10 @@ function createObservable(path, opts) {
   connect();
   return { ...emitter, close, readyState, url: request.url };
 
-  function close() {
+  function close(error?: Error) {
     controller.abort();
     readyState = states.CLOSED;
-    emitter.emit('error');
+    emitter.emit('error', error);
   }
 
   function connect() {
@@ -49,23 +49,22 @@ function createObservable(path, opts) {
   }
 
   function emitEvent() {
-    return through.obj((chunk, _, next) => {
+    return through.obj((chunk: SSE, _: BufferEncoding, next: Function) => {
       const { event, data } = chunk;
       if (chunk.id) lastEventId = chunk.id;
-      if (chunk.reconnectDelay) reconnectDelay = chunk.reconnectDelay;
+      if (chunk.retry) reconnectDelay = chunk.retry;
       emitter.emit(event, data);
       next();
     });
   }
 
-  function retryConnect(error) {
-    if (readyState !== states.OPEN) return close();
+  function retryConnect(error: Error) {
+    if (readyState !== states.OPEN) return close(error);
     readyState = states.CONNECTING;
     return setTimeout(connect, reconnectDelay);
   }
 
-  function removeListeners(error) {
-    emitter.emit('error', error);
+  function removeListeners() {
     emitter.all.clear();
   }
 }
