@@ -9,7 +9,7 @@ export type SSE = {
 
 const defaultEvent = { event: 'message', data: [] };
 
-function parse() {
+function parse(): TransformStream {
   return through.obj((chunk: Buffer, _: BufferEncoding, next: Function) => {
     const message = chunk.toString();
     const lines = message.split(/[\r\n]/);
