@@ -34,7 +34,7 @@ function parseLine(line: string) {
 }
 
 function toEvent(event: SSE, { name, value }) {
-  if (name === 'data') return { ...event, data: [...event.data, ...value] };
+  if (name === 'data') return { ...event, data: [...event.data, value] };
   if (!value) return event;
   if (name === 'retry') return { ...event, reconnectDelay: value };
   if (name === 'event') return { ...event, event: value };
