@@ -23,9 +23,11 @@
   "scripts": {
     "build": "microbundle",
     "lint": "eslint src",
-    "publish": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
+    "publish": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
+    "test": "tape -r ts-node/register src/*.test.ts | tap-spec"
   },
   "dependencies": {
+    "mississippi": "^4.0.0",
     "mitt": "^2.1.0",
     "pump": "^3.0.0",
     "readable-web-to-node-stream": "^3.0.1",
@@ -39,6 +41,7 @@
     "@types/pump": "^1.1.1",
     "@types/split2": "^2.1.6",
     "@types/through2": "^2.0.36",
+    "@types/tape": "^4.13.0",
     "eslint": "^7.18.0",
     "eslint-config-semistandard": "^15.0.1",
     "eslint-config-standard": "^16.0.2",
@@ -48,6 +51,10 @@
     "eslint-plugin-require-sort": "^1.2.2",
     "eslint-plugin-standard": "^5.0.0",
     "eslint-plugin-vue": "^7.4.1",
-    "microbundle": "^0.13.0"
+    "microbundle": "^0.13.0",
+    "tap-spec": "^5.0.0",
+    "tape": "^5.2.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
   }
 }

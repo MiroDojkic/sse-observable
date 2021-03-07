@@ -1,5 +1,10 @@
 import * as through from 'through2';
 
+type SSEField = {
+  name: string,
+  value?: string
+}
+
 export type SSE = {
   data: string,
   event: string,
@@ -33,7 +38,7 @@ function parseLine(line: string) {
   return { name, value };
 }
 
-function toEvent(event: SSE, { name, value }) {
+function toEvent(event: SSE, { name, value }: SSEField) {
   if (name === 'data') return { ...event, data: [...event.data, value] };
   if (!value) return event;
   if (name === 'retry') return { ...event, reconnectDelay: value };
