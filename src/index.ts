@@ -1,9 +1,9 @@
 import mitt from 'mitt';
-import pump from 'pump';
+import * as pump from 'pump';
 import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
-import split from 'split2';
+import * as split from 'split2';
 import parseSSE, { SSE } from './sse-parser';
-import through from 'through2';
+import * as through from 'through2';
 
 const states = {
   CONNECTING: 'CONNECTING',
@@ -34,12 +34,12 @@ function createObservable(path: string, opts: RequestInit) {
   function connect() {
     if (lastEventId) headers.set('Last-Event-ID', lastEventId);
     return window.fetch(request, { ...opts, headers, signal })
-      .then(response => {
-        if (!response.ok || response.status === 204) return close();
+      .then(({ ok, status, body }) => {
+        if (!ok || !body || status === 204) return close();
         readyState = states.OPEN;
         emitter.emit('open');
         return pump(
-          new ReadableWebToNodeStream(response.body),
+          new ReadableWebToNodeStream(body),
           split('\n\n'),
           parseSSE(),
           emitEvent(),

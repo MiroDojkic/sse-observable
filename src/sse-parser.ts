@@ -1,4 +1,4 @@
-import through from 'through2';
+import * as through from 'through2';
 
 export type SSE = {
   data: string,
@@ -9,7 +9,7 @@ export type SSE = {
 
 const defaultEvent = { event: 'message', data: [] };
 
-function parse(): TransformStream {
+function parse() {
   return through.obj((chunk: Buffer, _: BufferEncoding, next: Function) => {
     const message = chunk.toString();
     const lines = message.split(/[\r\n]/);
