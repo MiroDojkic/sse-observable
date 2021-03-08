@@ -1,5 +1,10 @@
 import * as through from 'through2';
 
+type SSEField = {
+  name: string,
+  value?: string
+}
+
 export type SSE = {
   data: string,
   event: string,
@@ -10,7 +15,7 @@ export type SSE = {
 const defaultEvent = { event: 'message', data: [] };
 
 function parse() {
-  return through.obj((chunk: Buffer, _: BufferEncoding, next: Function) => {
+  return through.obj((chunk, _, next) => {
     const message = chunk.toString();
     const lines = message.split(/[\r\n]/);
     const event = lines
@@ -33,7 +38,7 @@ function parseLine(line: string) {
   return { name, value };
 }
 
-function toEvent(event: SSE, { name, value }) {
+function toEvent(event: SSE, { name, value }: SSEField) {
   if (name === 'data') return { ...event, data: [...event.data, value] };
   if (!value) return event;
   if (name === 'retry') return { ...event, reconnectDelay: value };
