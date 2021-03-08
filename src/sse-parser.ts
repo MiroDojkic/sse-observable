@@ -15,7 +15,7 @@ export type SSE = {
 const defaultEvent = { event: 'message', data: [] };
 
 function parse() {
-  return through.obj((chunk: Buffer, _: BufferEncoding, next: Function) => {
+  return through.obj((chunk, _, next) => {
     const message = chunk.toString();
     const lines = message.split(/[\r\n]/);
     const event = lines

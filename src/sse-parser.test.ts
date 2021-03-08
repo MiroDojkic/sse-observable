@@ -3,6 +3,7 @@ import * as tape from 'tape';
 import tapSpec from 'tap-spec';
 // @ts-ignore
 import miss from 'mississippi';
+import * as through from 'through2';
 import * as split from 'split2';
 import parse from './sse-parser';
 
@@ -24,26 +25,20 @@ test('It returns SSE', t => {
     fromString(sseStream),
     split('\n\n'),
     parse(),
-    miss.through.obj((chunk: ParsedSSE, _: BufferEncoding, next: Function) => {
+    through.obj((chunk: ParsedSSE, _, next) => {
       t.equal(toInt(chunk.lastEventId), 1);
       next();
     })
   )
 });
 
+
 function fromString(string: string): ReadableStream {
-  return miss.from(function(size: number, next: Function) {
-    // if there's no more content
-    // left in the string, close the stream.
-    if (string.length <= 0) return next(null, null)
-
-    // Pull in a new chunk of text,
-    // removing it from the string.
-    const chunk = string.slice(0, size)
-    string = string.slice(size)
-
-    // Emit "chunk" from the stream.
-    next(null, chunk)
+  return miss.from((size: number, next: through.TransformCallback) => {
+    if (string.length <= 0) return next(null, null);
+    const chunk = string.slice(0, size);
+    string = string.slice(size);
+    next(null, chunk);
   })
 }
 
