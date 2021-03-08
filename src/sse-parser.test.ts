@@ -1,7 +1,9 @@
 import * as tape from 'tape';
+// @ts-ignore
 import tapSpec from 'tap-spec';
+// @ts-ignore
 import miss from 'mississippi';
-import split from 'split2';
+import * as split from 'split2';
 import parse from './sse-parser';
 
 const test = tape.createHarness();
