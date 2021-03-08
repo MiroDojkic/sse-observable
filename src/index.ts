@@ -1,4 +1,4 @@
-import mitt from 'mitt';
+import mitt, { Emitter } from 'mitt';
 import * as pump from 'pump';
 import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
 import * as split from 'split2';
@@ -9,12 +9,20 @@ const states = {
   CONNECTING: 'CONNECTING',
   OPEN: 'OPEN',
   CLOSED: 'CLOSED'
-};
+} as const;
+type ReadyState = typeof states[keyof typeof states];
+
+export interface Observable extends Emitter {
+  close: (error?: Error) => void,
+  readyState: ReadyState,
+  url: URL
+}
+
 const DEFAULT_RECONNECTION_DELAY = 30000;
 
-function createObservable(path: string, opts: RequestInit) {
+function createObservable(path: string, opts: RequestInit): Observable {
   const emitter = mitt();
-  let readyState = states.CONNECTING;
+  let readyState: ReadyState = states.CONNECTING;
   let reconnectDelay = DEFAULT_RECONNECTION_DELAY;
   let lastEventId: string;
   const controller = new AbortController();
@@ -23,7 +31,7 @@ function createObservable(path: string, opts: RequestInit) {
   const request = new Request(path);
   emitter.on('error', removeListeners);
   connect();
-  return { ...emitter, close, readyState, url: request.url };
+  return { ...emitter, close, readyState, url: new URL(request.url) };
 
   function close(error?: Error) {
     controller.abort();
@@ -49,7 +57,7 @@ function createObservable(path: string, opts: RequestInit) {
   }
 
   function emitEvent() {
-    return through.obj((chunk: SSE, _: BufferEncoding, next: Function) => {
+    return through.obj((chunk: SSE, _, next) => {
       const { event, data } = chunk;
       if (chunk.id) lastEventId = chunk.id;
       if (chunk.retry) reconnectDelay = chunk.retry;
